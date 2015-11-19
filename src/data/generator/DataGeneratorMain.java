@@ -87,7 +87,7 @@ public class DataGeneratorMain extends Thread {
 			System.exit(0);
 		}
 		try{
-			DataGeneratorMain dataGeneratorMain = new DataGeneratorMain(4221, 1000);
+			DataGeneratorMain dataGeneratorMain = new DataGeneratorMain(port, frequency);
 			dataGeneratorMain.start();
 			while(true){
 				dataGeneratorMain.checkConnections();
