@@ -69,6 +69,23 @@ public class DataGeneratorMain extends Thread {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		if(args.length != 2){
+			System.out.println("Usage: java DataGeneratorMain <port> <sendingFrequency>");
+			System.exit(0);
+		}
+		int port = 0;
+		long frequency = 0;
+		try{
+			port = Integer.parseInt(args[0]);
+			frequency = Integer.parseInt(args[1]);
+			if(port < 1 || frequency < 10) throw new Exception();
+		} catch (NumberFormatException e){
+			System.out.println("Port/frequency is not an integer!");
+			System.exit(0);
+		} catch (Exception e) {
+			System.out.println("Port/frequency is out of range!");
+			System.exit(0);
+		}
 		try{
 			DataGeneratorMain dataGeneratorMain = new DataGeneratorMain(4221, 1000);
 			dataGeneratorMain.start();

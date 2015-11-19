@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ public class GeneratorReceiver extends Thread {
 			} catch (UnknownHostException e) {
 				// TODO Auto-generated catch block
 				System.out.println("Host or port can't be reached!");
+			} catch (ConnectException e){
+				System.out.println("Connection refused!");
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

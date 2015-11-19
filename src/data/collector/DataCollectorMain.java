@@ -80,8 +80,23 @@ public class DataCollectorMain extends Thread{
 	}
 	
 	public static void main(String[] args) {
+		if(args.length != 1){
+			System.out.println("Usage: java DataCollectorMain <port>");
+			System.exit(0);
+		}
+		int port = 0;
 		try{
-			DataCollectorMain d = new DataCollectorMain(4214);
+			port = Integer.parseInt(args[0]);
+			if(port < 1) throw new Exception();
+		} catch (NumberFormatException e){
+			System.out.println("Port is not an integer!");
+			System.exit(0);
+		} catch (Exception e) {
+			System.out.println("Port is out of range!");
+			System.exit(0);
+		}
+		try{
+			DataCollectorMain d = new DataCollectorMain(port);
 			d.start();
 		}
 		catch(Exception e){
