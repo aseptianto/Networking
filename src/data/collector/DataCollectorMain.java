@@ -23,6 +23,7 @@ public class DataCollectorMain extends Thread{
 		Scanner s = new Scanner(System.in);
 		String rawInput = "";
 		while(!rawInput.toLowerCase().equals("exit")){
+			System.out.print("RSCLI: ");
 			rawInput = s.nextLine();
 			rawInput = rawInput.toLowerCase();
 			String[] inputs = rawInput.split(" ");
@@ -61,16 +62,17 @@ public class DataCollectorMain extends Thread{
 			case "exit":
 				break;
 			case "help":
-				System.out.println("\nCommands:\n"
+				System.out.println("RSCLI (Really Simple Command Line Interface) V1.0\nCommands:\n"
 						+ "add <host> <port> -> connects to a DataGenerator\n"
 						+ "show -> shows active connections to Data Generators\n"
 						+ "close <index> -> closes a socket given the index number from 'show' command\n"
-						+ "exit -> shuts down the program\n\n");
+						+ "exit -> shuts down the program\n");
 				break;
 			default:
 				System.out.println("Unknown command. Type 'help' to see commands");
 			}
 		}
+		s.close();
 		shutDown();
 	}
 	

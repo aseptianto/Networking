@@ -123,7 +123,15 @@ public class GeneratorReceiver extends Thread {
 		// TODO Auto-generated method stub
 		//monitor interrupted handles
 		while(!shutdown){
-			if(generatorHandles.isEmpty()) continue;
+			if(generatorHandles.isEmpty()){
+				// some anomaly happens if only continue, sleep..
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					// do nothing
+				}
+				continue;
+			}
 			synchronized(generatorHandles){
 				Iterator<GeneratorHandle> iter = generatorHandles.iterator();
 				int index = 0;

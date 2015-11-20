@@ -23,6 +23,7 @@ public class StatisticCalculator {
 	
 	public void getWordList(String host, int port) throws IOException, UnknownHostException, ConnectException{
 		socket = new Socket(host, port);
+		wordList.clear();
 		in = new DataInputStream(socket.getInputStream());
 		while(true){
 			String input = in.readUTF();
@@ -108,11 +109,11 @@ public class StatisticCalculator {
 				doStatistics();
 				break;
 			case "help":
-				System.out.println("RSCLI (Really Simple Command Line Interface)\nCommands:\n"
+				System.out.println("RSCLI (Really Simple Command Line Interface) V1.0\nCommands:\n"
 						+ "get <host> <port> -> connects to a DataCollector and collects the stored words\n"
-						+ "Warning: get command will remove previous collected words from prior get commands\n"
+						+ "WARNING: get command will remove previous collected words from prior get commands\n"
 						+ "statistics -> shows statistics of the word gathered\n"
-						+ "exit -> shuts down the program\n\n");
+						+ "exit -> shuts down the program\n");
 				break;
 			case "exit":
 				break;
