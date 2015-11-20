@@ -15,7 +15,7 @@ public class DataCollectorMain extends Thread{
 		System.out.println("GeneratorReceiver Started");
 		statisticReceiver.setName("statisticReceiver");
 		statisticReceiver.start();
-		System.out.println("StatisticReceiver Started");
+		System.out.println("StatisticReceiver Started in port " + port);
 	}
 	
 	@Override
