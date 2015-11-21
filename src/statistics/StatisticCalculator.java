@@ -1,6 +1,7 @@
 package statistics;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
@@ -15,20 +16,29 @@ public class StatisticCalculator {
 
 	private Socket socket;
 	private DataInputStream in;
+	private DataOutputStream out;
 	private List<String> wordList;
 	
 	public StatisticCalculator(){
 		wordList = new ArrayList<String>();
 	}
 	
-	public void getWordList(String host, int port) throws IOException, UnknownHostException, ConnectException{
+	public void getWordList(String host, int port, String generatorName) throws IOException, UnknownHostException, ConnectException{
 		socket = new Socket(host, port);
 		wordList.clear();
 		in = new DataInputStream(socket.getInputStream());
-		while(true){
-			String input = in.readUTF();
-			if(input.equals("!{EOF}")) break;
-			wordList.add(input);
+		out = new DataOutputStream(socket.getOutputStream());
+		out.writeUTF(generatorName);
+		String result = in.readUTF();
+		if(result.equals("1")){
+			while(true){
+				String input = in.readUTF();
+				if(input.equals("!{EOF}")) break;
+				wordList.add(input);
+			}
+		}
+		else{
+			System.out.println("Requested generator not available!");
 		}
 		in.close();
 		socket.close();
@@ -86,13 +96,13 @@ public class StatisticCalculator {
 			String[] inputs = rawInput.toLowerCase().split(" ");
 			switch(inputs[0]){
 			case "get":
-				if(inputs.length != 3){
-					System.out.println("Usage: get <host> <port>");
+				if(inputs.length != 4){
+					System.out.println("Usage: get <host> <port> <generatorIP:generatorPort>");
 				}
 				else{
 					try{
 						int port = Integer.parseInt(inputs[2]);
-						getWordList(inputs[1], port);
+						getWordList(inputs[1], port, inputs[3]);
 						
 					} catch(NumberFormatException e){
 						System.out.println("Port is not integer?");

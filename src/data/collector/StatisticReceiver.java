@@ -1,19 +1,15 @@
 package data.collector;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.io.Reader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +17,7 @@ public class StatisticReceiver extends Thread {
 
 	private ServerSocket receiver;
 	private Socket clientSocket;
+	private DataInputStream in;
 	private DataOutputStream out;
 	private boolean shutdown;
 
@@ -41,11 +38,10 @@ public class StatisticReceiver extends Thread {
 		shutdown = true;
 	}
 	
-	public List<String> lockAndReadFile(){
+	public List<String> lockAndReadFile(File file){
 		List<String> result = new ArrayList<String>();
 		System.out.println("Read file without locking...");
 		try{
-			File file = new File("storedWords.txt");
 			FileInputStream in = new FileInputStream(file);
 			BufferedReader reader = new BufferedReader(
 					new InputStreamReader(in));
@@ -63,6 +59,24 @@ public class StatisticReceiver extends Thread {
 		
 		return result;
 	}
+	
+	public String formatNameToFile(String generatorName){
+		String result = generatorName;
+		result = result.replace(":", "_");
+		return result + ".txt";
+	}
+	
+	public File getTXTFile(String generatorName){
+		File curDir = new File(".");
+		String requestedFile = formatNameToFile(generatorName);
+		for(File file : curDir.listFiles()){
+			if(file.isFile()){
+                String fileName = file.getName();
+                if(fileName.equals(requestedFile)) return file;
+            }
+		}
+		return null;
+	}
 
 	@Override
 	public void run() {
@@ -73,49 +87,34 @@ public class StatisticReceiver extends Thread {
 				System.out.println("Got request from "
 						+ clientSocket.getInetAddress().getHostAddress() + ":"
 						+ clientSocket.getPort());
-				out = new DataOutputStream(clientSocket.getOutputStream());
-				List<String> strings = lockAndReadFile();
-//				System.out.print("Locking and reading file...");
-//				File file = new File("storedWords.txt");
-//				FileInputStream in = new FileInputStream(file);
-//				RandomAccessFile randomAccess = new RandomAccessFile(file, "rw");
-//				FileChannel channel = randomAccess.getChannel();
-//				FileLock lock = channel.lock();
-//				try {
-//					lock = channel.tryLock();
-//					try {
-//						BufferedReader reader = new BufferedReader(
-//								new InputStreamReader(in));
-//						StringBuilder out = new StringBuilder();
-//						String line;
-//						while ((line = reader.readLine()) != null) {
-//							out.append(line);
-//							strings.add(out.toString());
-//						}
-//						reader.close();
-//					} finally {
-//						if( lock != null ) {
-//				            lock.release();
-//				        }
-//						channel.close();
-//					}
-//				} finally {
-//					in.close();
-//					channel.close();
-//				}
-//				randomAccess.close();
-				System.out.println("Done!");
-				System.out.print("Sending to client...");
-				// more processing time, but at least file is not locked too
-				// long
-				for (int i = 0; i < strings.size(); i++) {
-					out.writeUTF(strings.get(i));
-					out.flush();
+				in = new DataInputStream(clientSocket.getInputStream());
+				// retrieve generator name
+				// input is 127.0.0.1:4221 -> 127.0.0.1_4221.txt
+				String generatorName = in.readUTF();
+				File file = getTXTFile(generatorName);
+				if(file == null){
+					out = new DataOutputStream(clientSocket.getOutputStream());
+					System.out.println("Requested Generator not available -> " + generatorName);
+					out.writeUTF("-1");
 				}
-				// send end message "!{EOF}"
-				out.writeUTF("!{EOF}");
-				out.flush();
-				System.out.println("Done!");
+				else{
+					System.out.println("Requested " + file.getName());
+					out = new DataOutputStream(clientSocket.getOutputStream());
+					out.writeUTF("1");
+					List<String> strings = lockAndReadFile(file);
+					System.out.println("Done!");
+					System.out.print("Sending to client...");
+					// more processing time, but at least file is not locked too
+					// long
+					for (int i = 0; i < strings.size(); i++) {
+						out.writeUTF(strings.get(i));
+						out.flush();
+					}
+					// send end message "!{EOF}"
+					out.writeUTF("!{EOF}");
+					out.flush();
+					System.out.println("Done!");
+				}
 			} catch(SocketException e){
 				System.out.println("Server Socket closed!");
 				break;

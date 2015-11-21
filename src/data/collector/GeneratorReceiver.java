@@ -40,9 +40,11 @@ public class GeneratorReceiver extends Thread {
 		return result;
 	}
 	
-	public synchronized void addWord(String word){
+	public synchronized void addWord(String word, Socket clientSocket){
 		word += "\n"; // add new line
-		File file = new File("storedWords.txt");
+		// file name should be 127.0.0.1_4221.txt
+		String filename = clientSocket.getInetAddress().getHostAddress() + "_" + clientSocket.getPort();
+		File file = new File(filename + ".txt");
 		try {
 			// lock
 			FileOutputStream out = new FileOutputStream(file, true);

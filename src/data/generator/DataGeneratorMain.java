@@ -28,7 +28,8 @@ public class DataGeneratorMain extends Thread {
 		wordList = Files.readAllLines(Paths.get("words.txt"), Charset.defaultCharset());
 		if(wordList.isEmpty()) throw new IOException("words.txt might have something wrong!");
 		serverSocket = new ServerSocket(this.port);
-		System.out.println("Data Generator in port " + this.port + " ready to accept");
+		System.out.println("Data Generator in port " + this.port + " ready to accept\n"
+				+ "The frequency is " + this.sendRate + "ms.");
 	}
 	
 	@Override
@@ -42,6 +43,7 @@ public class DataGeneratorMain extends Thread {
 					generatorConnections.add(newConnection);
 				}
 				newConnection.start();
+				System.out.println("Established connection to " + clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort() + "!");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -54,7 +56,6 @@ public class DataGeneratorMain extends Thread {
 		// prevent concurrent exception
 		synchronized(generatorConnections){
 			Iterator<GeneratorConnection> iter = generatorConnections.iterator();
-
 			while (iter.hasNext()) {
 			    GeneratorConnection g = iter.next();
 			    if (g.isFinished()){

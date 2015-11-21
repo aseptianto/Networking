@@ -38,7 +38,7 @@ public class GeneratorHandle extends Thread {
 		while(!finished){
 			try {
 				String word = in.readUTF();
-				parent.addWord(word);
+				parent.addWord(word, clientSocket);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				// assume server closes connection
