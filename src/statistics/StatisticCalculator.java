@@ -17,15 +17,18 @@ public class StatisticCalculator {
 	private Socket socket;
 	private DataInputStream in;
 	private DataOutputStream out;
-	private List<String> wordList;
+	//private List<String> wordList;
+	private Map<String, List<String>> generatorWordList;
 	
 	public StatisticCalculator(){
-		wordList = new ArrayList<String>();
+		//wordList = new ArrayList<String>();
+		generatorWordList = new HashMap<String, List<String>>();
 	}
 	
 	public void getWordList(String host, int port, String generatorName) throws IOException, UnknownHostException, ConnectException{
 		socket = new Socket(host, port);
-		wordList.clear();
+		List<String> wordList = new ArrayList<String>();
+		//wordList.clear();
 		in = new DataInputStream(socket.getInputStream());
 		out = new DataOutputStream(socket.getOutputStream());
 		out.writeUTF(generatorName);
@@ -36,6 +39,7 @@ public class StatisticCalculator {
 				if(input.equals("!{EOF}")) break;
 				wordList.add(input);
 			}
+			generatorWordList.put(generatorName, wordList);
 		}
 		else{
 			System.out.println("Requested generator not available!");
@@ -44,7 +48,12 @@ public class StatisticCalculator {
 		socket.close();
 	}
 	
-	public void doStatistics(){
+	public void doStatistics(String generatorKey){
+		List<String> wordList = generatorWordList.get(generatorKey);
+		if(wordList == null){
+			System.out.println(generatorKey + " is not in the list!");
+			return;
+		}
 		Map<String, Integer> uniqueWords = new HashMap<String, Integer>();
 		int count;
 		int biggestCount = 1;
@@ -74,6 +83,7 @@ public class StatisticCalculator {
 				longestWordLength = w.length();
 		}
 		double average = totalLetters / (double) wordList.size();
+		System.out.println("Statistics for generator in " + generatorKey);
 		System.out.println("There are " + uniqueWords.size() + " unique words from a total of " + wordList.size() + " words.");
 		if(!mostCommonWord.equals("")){
 			System.out.println("The most common word is '" + mostCommonWord + "' with " + biggestCount + " occurences.");
@@ -85,6 +95,18 @@ public class StatisticCalculator {
 		System.out.println("Min: " + shortestWordLength);
 		System.out.println("Max: " + longestWordLength);
 		System.out.println("Avg: " + average);
+	}
+	
+	public void listGenerators(){
+		if(generatorWordList.isEmpty()){
+			System.out.println("No saved generator statistics at the moment");
+			return;
+		}
+		System.out.println("Saved generators:");
+		for(String s : generatorWordList.keySet()){
+			System.out.println(s);
+		}
+		System.out.println();
 	}
 	
 	public void beginCLI(){
@@ -116,14 +138,24 @@ public class StatisticCalculator {
 				}
 				break;
 			case "statistics":
-				doStatistics();
+				if(inputs.length != 2){
+					System.out.println("Usage: statistics <generatorIP:generatorPort>");
+				}
+				else{
+					String generatorKey = inputs[1];
+					doStatistics(generatorKey);
+				}
 				break;
 			case "help":
 				System.out.println("RSCLI (Really Simple Command Line Interface) V1.0\nCommands:\n"
-						+ "get <host> <port> -> connects to a DataCollector and collects the stored words\n"
-						+ "WARNING: get command will remove previous collected words from prior get commands\n"
-						+ "statistics -> shows statistics of the word gathered\n"
+						+ "get <host> <port> <generatorIP:generatorPort> -> connects to a DataCollector and collects the stored words\n"
+						+ "'get localhost 4500 127.0.0.1:4221' connects collector in localhost:4500 and requests statistics from generator in 127.0.0.1:4221\n"
+						+ "WARNING: get command will remove previous collected words from prior get commands to the same generators\n"
+						+ "statistics <generatorIP:generatorPort> -> shows statistics of the word gathered\n"
 						+ "exit -> shuts down the program\n");
+				break;
+			case "list":
+				listGenerators();
 				break;
 			case "exit":
 				break;
