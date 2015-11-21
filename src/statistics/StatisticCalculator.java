@@ -60,7 +60,7 @@ public class StatisticCalculator {
 					biggestCount = count;
 					mostCommonWord = w;
 				}
-				uniqueWords.replace(w, count);
+				uniqueWords.put(w, count);
 			}
 			else{
 				// add unique words
