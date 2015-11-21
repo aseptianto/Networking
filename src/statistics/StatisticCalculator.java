@@ -63,6 +63,10 @@ public class StatisticCalculator {
 			System.out.println(generatorKey + " is not in the list!");
 			return;
 		}
+		else if(wordList.isEmpty()){
+			System.out.println("There is no word collected from the generator/all generators");
+			return;
+		}
 		Map<String, Integer> uniqueWords = new HashMap<String, Integer>();
 		int count;
 		int biggestCount = 1;
