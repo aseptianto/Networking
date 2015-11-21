@@ -49,7 +49,16 @@ public class StatisticCalculator {
 	}
 	
 	public void doStatistics(String generatorKey){
-		List<String> wordList = generatorWordList.get(generatorKey);
+		List<String> wordList = new ArrayList<String>();
+		if(generatorKey.equals("all")){
+			wordList = new ArrayList<String>();
+			for(String key : generatorWordList.keySet()){
+				wordList.addAll(generatorWordList.get(key));
+			}
+		}
+		else{
+			wordList = generatorWordList.get(generatorKey);	
+		}
 		if(wordList == null){
 			System.out.println(generatorKey + " is not in the list!");
 			return;
@@ -83,7 +92,12 @@ public class StatisticCalculator {
 				longestWordLength = w.length();
 		}
 		double average = totalLetters / (double) wordList.size();
-		System.out.println("Statistics for generator in " + generatorKey);
+		if(generatorKey.equals("all")){
+			System.out.println("Statistics for all gathered generators");
+		}
+		else{
+			System.out.println("Statistics for generator in " + generatorKey);
+		}
 		System.out.println("There are " + uniqueWords.size() + " unique words from a total of " + wordList.size() + " words.");
 		if(!mostCommonWord.equals("")){
 			System.out.println("The most common word is '" + mostCommonWord + "' with " + biggestCount + " occurences.");
